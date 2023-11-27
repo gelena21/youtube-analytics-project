@@ -11,7 +11,7 @@ def moscowpython_channel():
 
 
 def test_channel_attributes(moscowpython_channel):
-    assert moscowpython_channel.id == 'UC-OVMPlMA3-YCIeg4z5z23A'
+    assert moscowpython_channel._channel_id == 'UC-OVMPlMA3-YCIeg4z5z23A'
     assert len(moscowpython_channel.title) > 0
     assert len(moscowpython_channel.description) > 0
     assert len(moscowpython_channel.url) > 0
@@ -35,3 +35,34 @@ def test_channel_to_json(moscowpython_channel, tmp_path):
         assert 'subscriber_count' in channel_data
         assert 'video_count' in channel_data
         assert 'view_count' in channel_data
+
+
+def test_channel_str(moscowpython_channel):
+    expected_str = f"{moscowpython_channel.title} ({moscowpython_channel.url})"
+    assert str(moscowpython_channel) == expected_str
+
+
+@pytest.fixture
+def highload_channel():
+    return Channel('UCwHL6WHUarjGfUM_586me8w')
+
+
+def test_channel_addition(moscowpython_channel, highload_channel):
+    total_subscribers = (moscowpython_channel.subscriber_count
+                         + highload_channel.subscriber_count)
+    assert moscowpython_channel + highload_channel == total_subscribers
+
+
+def test_channel_subtraction(moscowpython_channel, highload_channel):
+    difference_subscribers = (moscowpython_channel.subscriber_count
+                              - highload_channel.subscriber_count)
+    assert moscowpython_channel - highload_channel == difference_subscribers
+
+
+def test_channel_comparison(moscowpython_channel, highload_channel):
+    assert moscowpython_channel < highload_channel
+    assert moscowpython_channel <= highload_channel
+    assert not moscowpython_channel > highload_channel
+    assert not moscowpython_channel >= highload_channel
+    assert not moscowpython_channel == highload_channel
+    assert moscowpython_channel != highload_channel
