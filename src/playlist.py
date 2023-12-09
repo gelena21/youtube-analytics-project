@@ -12,6 +12,7 @@ class PlayList:
         self.api_key = os.getenv('YT_API_KEY')
         self.youtube = self.build_youtube_service()
         self.playlist_info = self.get_playlist_info()
+        self.url = f"https://www.youtube.com/playlist?list={self.playlist_id}"
 
     def build_youtube_service(self):
         return build('youtube', 'v3', developerKey=self.api_key)
