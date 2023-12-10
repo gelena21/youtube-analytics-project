@@ -1,7 +1,11 @@
 import os
 import datetime
+import dotenv
 import isodate
 from googleapiclient.discovery import build
+from isodate import parse_duration
+
+dotenv.load_dotenv()
 
 SCOPES = ['https://www.googleapis.com/auth/youtube.readonly']
 
@@ -42,8 +46,11 @@ class PlayList:
 
         total_duration = datetime.timedelta()
         for video in videos:
-            duration = video['contentDetails']['duration']
-            total_duration += youtube_duration_to_timedelta(duration)
+            content_details = video.get('contentDetails', {})
+            duration = content_details.get('duration', '')
+            if duration:
+                parsed_duration = parse_duration(duration)
+                total_duration += parsed_duration
 
         return total_duration
 
@@ -58,4 +65,7 @@ class PlayList:
 
 
 def youtube_duration_to_timedelta(duration):
-    return datetime.timedelta(seconds=isodate.parse_duration(duration).total_seconds())
+    try:
+        return datetime.timedelta(seconds=isodate.parse_duration(duration).total_seconds())
+    except (isodate.ISO8601Error, TypeError):
+        return datetime.timedelta()
