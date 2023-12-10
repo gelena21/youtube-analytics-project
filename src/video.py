@@ -3,7 +3,6 @@ from dotenv import load_dotenv
 import os
 import typing
 
-from helper.youtube_api_manual import video_response
 
 load_dotenv()
 
@@ -27,7 +26,7 @@ class Video:
     def fetch_video_info(self) -> dict:
         """Получает информацию о видео с помощью YouTube API."""
         youtube = self.get_service()
-        video_responce: object = (
+        video_response: object = (
             youtube.videos().list(part="snippet,statistics,contentDetails,topicDetails", id=self.video_id).execute()
             )
         video_title: str = video_response["items"][0]["snippet"]["title"]
@@ -40,24 +39,7 @@ class Video:
             "like_count": like_count,
             "video_url": video_url,
         }
-        # youtube = build('youtube', 'v3', developerKey=self.API_KEY)
-        # request = youtube.videos().list(part='snippet,statistics', id=self.video_id)
-        # response = request.execute()
 
-    #     if 'items' in response and response['items']:
-    #         item = response['items'][0]
-    #         snippet = item['snippet']
-    #         statistics = item['statistics']
-    #
-    #         title = snippet.get('title', 'Unknown Video')
-    #         video_link = f'https://www.youtube.com/watch?v={self.video_id}'
-    #         views = int(statistics.get('viewCount', 0))
-    #         likes = int(statistics.get('likeCount', 0))
-    #
-    #         return title, video_link, views, likes
-    #     else:
-    #         return 'Unknown Video', '', 0, 0
-    #
     def __str__(self) -> str:
         return self.video_title
 
