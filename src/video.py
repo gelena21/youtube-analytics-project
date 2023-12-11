@@ -12,10 +12,20 @@ class Video:
 
     def __init__(self, video_id: str):
         self.video_id = video_id
-        self.video_title = self.fetch_video_info()["video_title"]
-        self.video_url = self.fetch_video_info()["video_url"]
-        self.view_count = self.fetch_video_info()["view_count"]
-        self.like_count = self.fetch_video_info()["like_count"]
+        self.title = None
+        self.video_url = None
+        self.view_count = None
+        self.like_count = None
+        self.error_message = None
+
+        try:
+            video_info = self.fetch_video_info()
+            self.title = video_info["video_title"]
+            self.video_url = video_info["video_url"]
+            self.view_count = video_info["view_count"]
+            self.like_count = video_info["like_count"]
+        except Exception as e:
+            self.error_message = str(e)
 
     @classmethod
     def get_service(cls) -> typing.Any:
@@ -41,7 +51,7 @@ class Video:
         }
 
     def __str__(self) -> str:
-        return self.video_title
+        return self.title
 
 
 class PLVideo(Video):
