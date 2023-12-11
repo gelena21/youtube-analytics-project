@@ -4,6 +4,7 @@ import dotenv
 import isodate
 from googleapiclient.discovery import build
 from isodate import parse_duration
+from src.video import Video
 
 dotenv.load_dotenv()
 
@@ -46,7 +47,12 @@ class PlayList:
 
         total_duration = datetime.timedelta()
         for video in videos:
-            content_details = video.get('contentDetails', {})
+            video_id = video["contentDetails"]["videoId"]
+            video_response = self.youtube.videos().list(
+                part='snippet,statistics,contentDetails,topicDetails',
+                id=video_id
+            ).execute()
+            content_details = video_response['items'][0]['contentDetails']
             duration = content_details.get('duration', '')
             if duration:
                 parsed_duration = parse_duration(duration)
@@ -54,14 +60,25 @@ class PlayList:
 
         return total_duration
 
-    def show_best_video(self):
+    def get_video_ids(self):
         videos = self.youtube.playlistItems().list(
-            part="snippet",
+            part="contentDetails",
             playlistId=self.playlist_id
         ).execute()['items']
 
-        best_video = max(videos, key=lambda video: video['snippet']['likeCount'])
-        return f"https://www.youtube.com/watch?v={best_video['snippet']['resourceId']['videoId']}"
+        return [video["contentDetails"]["videoId"] for video in videos]
+
+    def show_best_video(self):
+        video_ids = self.get_video_ids()
+        list_with_video_info = []
+        for video_id in video_ids:
+            video_info_dict = {}
+            video_obj = Video(video_id)  # инициализация через класс Video
+            video_info_dict["likes"] = video_obj.like_count
+            video_info_dict["url"] = video_obj.video_url
+            list_with_video_info.append(video_info_dict)
+        sorted_list = sorted(list_with_video_info, key=lambda x: x["likes"], reverse=True)
+        return sorted_list[0]["url"]
 
 
 def youtube_duration_to_timedelta(duration):
